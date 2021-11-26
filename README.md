@@ -5,10 +5,10 @@ Python script for converting figma produced SVG files into C++ JUCE framework so
 
 ## Getting Started
 
-Make some stuff in a new Figma project
-Export to SVG with "include id attribute" turned on
-Run the script from the OpenProject.py entry point to create a .json file that points to your SVG file folder and your C++ source folder
-Run the script on the .json to process the svg into C++ code
+- Make some stuff in a new Figma project
+- Export to SVG with "include id attribute" turned on
+- Run the script from the OpenProject.py entry point to create a .json file that points to your SVG file folder and your C++ source folder
+- Run the script on the .json to process the svg into C++ code
 
 ## Layer Tag System
 
