@@ -1,0 +1,30 @@
+SVG:
+
+export: [filename]_button.svg
+the _[classtype] changes the export file form a standard component to any of the current alternative juce classes:
+button/scrollbar/togglebutton
+use in conjunction with ::state to create hover over and on click functionality
+
+::ignore
+Ignores this element
+
+::scales
+#linear
+Scaled additively to preserve internal distances from the bounds' edges
+#centre
+Scaled additively by largest change in width or height ie preserve the shape of a circle as the bounds change in size
+#bounds
+Scaled multiplicatively width and height
+
+::component #[nameofcomponent]
+adds obect area as a designated area for a child component, including adding the .h file declaration
+
+::Label #labeltext
+name a RECTANGLE OBJECT to create a label with the colour given and centred on the rectangle
+
+::state #[buttonstate]
+adds object as a drawable button state and function within the cpp file
+
+::blendmode #[blendmode]:[blendcolourhash]
+modifies colours of all objects in the  group by the blendmode / blendcolourhash interaction given
+
