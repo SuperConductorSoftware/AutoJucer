@@ -22,9 +22,19 @@ Double colon (::) indicates a tag for the Figma group of graphical elements, the
 
 ::blendmode #[blendmode]:[blendcolourhash] - modifies colours of all objects in the  group by the blendmode / blendcolourhash interaction given
 
-### Missing Features / Features currently in progress
+## Missing Features / Features currently in progress
 
 - Gradients currently not implemented
 - Paint code unoptimised
 - Plans to expand export to other frameworks like iPlug2
+
+## Dependencies
+
+Python 3.8
+NumPy
+svg.path
+xml.dom
+tkinter
+PIL
+blend_modes
 
