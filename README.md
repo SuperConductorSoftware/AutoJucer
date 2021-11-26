@@ -30,11 +30,11 @@ Double colon (::) indicates a tag for the Figma group of graphical elements, the
 
 ## Dependencies
 
-Python 3.8
-NumPy
-svg.path
-xml.dom
-tkinter
-PIL
-blend_modes
+- Python 3.8
+- NumPy
+- svg.path
+- xml.dom
+- tkinter
+- PIL
+- blend_modes
 
