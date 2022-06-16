@@ -24,10 +24,6 @@ public:
     void drawScrollbar(Graphics& g, ScrollBar& scrollbar, int x, int y, int width, int height,
         bool isScrollbarVertical, int thumbStartPosition, int thumbSize, bool isMouseOver, bool isMouseDown) override;
 
-private:
     // >>>>PRIVATEMEMBERS>>>> (auto-generated)//
-
     // <<<<PRIVATEMEMBERS<<<< (will be overwritten!!)
-    
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(not_a_real_name)
 };

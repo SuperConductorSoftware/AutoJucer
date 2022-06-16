@@ -9,7 +9,7 @@ juceComponentDirectory = os.path.join(scriptDirectory,"JuceComponentFiles")
 # Asking for .json
 fileToOpen = fd.askopenfilename(title ="Select .json file")
 # Sets the On/Off[1/0] for each file when generating a new sjp
-defaultFileSetting = 1 # Set to 1 to enable all files for processing
+defaultFileSetting = 0 # Set to 1 to enable all files for processing
 
 # If file not given, script runs for new file
 if fileToOpen == "":

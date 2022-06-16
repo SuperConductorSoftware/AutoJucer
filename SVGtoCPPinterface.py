@@ -11,11 +11,9 @@ def SVGtoCPPinterface(componentName,componentType,svgFile,hFile,cppFile,sectionW
     cppFiles = CppFileClass(componentName,hFile,cppFile,sectionWriteToggle)
     componentStates = svg.getComponentStates()
     childComponents = svg.getChildComponents()
-    labels = svg.getLabels()
 
     # cppFiles interprets componentStates, children and labels from SVGtoJuceObjectClasses through duck typing
     cppFiles.addComponentStates(componentStates)
     cppFiles.addChildComponents(childComponents)
-    cppFiles.addLabels(labels)
 
     cppFiles.writeFiles()

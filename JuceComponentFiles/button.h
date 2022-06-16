@@ -21,7 +21,7 @@ class not_a_real_name : public Button
 {
 public:
 	not_a_real_name()=delete;
-	not_a_real_name(std::unique_ptr<AudioProcessorValueTreeState>& parameters);
+	not_a_real_name(AudioProcessorValueTreeState& parameters);
     ~not_a_real_name();
 
 protected:

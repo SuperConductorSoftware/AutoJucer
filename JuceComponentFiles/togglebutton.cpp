@@ -9,7 +9,7 @@
 #include "not_a_real_name.h"
 
 
-not_a_real_name::not_a_real_name(std::unique_ptr<AudioProcessorValueTreeState>& parameters)
+not_a_real_name::not_a_real_name(AudioProcessorValueTreeState& parameters)
 	: unusedmember(0)
 	// >>>>INITIALISATION>>>> (auto-generated)//
 
@@ -53,11 +53,12 @@ void not_a_real_name::paintButton(Graphics &g, bool isMouseOverButton, bool isBu
 		}
 	}
 
+    // >>>>RESIZED>>>> (auto-generated)//
+
+    // <<<<RESIZED<<<< (will be overwritten!!)
 }
 
-// >>>>RESIZED>>>> (auto-generated)//
 
-// <<<<RESIZED<<<< (will be overwritten!!)
 
 // >>>>FUNCTION>>>> (auto-generated)//
 

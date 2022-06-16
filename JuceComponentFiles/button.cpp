@@ -11,7 +11,7 @@
 
 //==============================================================================
 
-not_a_real_name::not_a_real_name(std::unique_ptr<AudioProcessorValueTreeState>& parameters)
+not_a_real_name::not_a_real_name(AudioProcessorValueTreeState& parameters)
 	: Button(String())
 	// >>>>INITIALISATION>>>> (auto-generated)//
 
@@ -41,11 +41,11 @@ void not_a_real_name::paintButton(Graphics &g, bool isMouseOverButton, bool isBu
 	else
 	{
 	}
+
+	// >>>>RESIZED>>>> (auto-generated)//
+
+    // <<<<RESIZED<<<< (will be overwritten!!)
 }
-
-// >>>>RESIZED>>>> (auto-generated)//
-
-// <<<<RESIZED<<<< (will be overwritten!!)
 
 // >>>>FUNCTION>>>> (auto-generated)//
 

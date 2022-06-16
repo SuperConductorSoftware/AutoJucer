@@ -24,11 +24,11 @@ void not_a_real_name::drawScrollbar(Graphics& g, ScrollBar& scrollbar, int x, in
 	// >>>>PAINT>>>> (auto-generated)//
 
 	// <<<<PAINT<<<< (will be overwritten!!)
+
+	// >>>>RESIZED>>>> (auto-generated)//
+
+    // <<<<RESIZED<<<< (will be overwritten!!)
 }
-
-// >>>>RESIZED>>>> (auto-generated)//
-
-// <<<<RESIZED<<<< (will be overwritten!!)
 
 // >>>>FUNCTION>>>> (auto-generated)//
 

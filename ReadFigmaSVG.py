@@ -3,7 +3,8 @@ from xml.dom import minidom
 import numpy as np
 import re
 from helperClasses.BrushClass import BrushClass
-import SVGtoJUCEObjectClasses as aj
+import juceComponentClasses as jC
+import jucePaintingClasses as jP
 import helperFunctions.SVGFunctions as svgfunctions
 
 
@@ -11,6 +12,14 @@ class ReadFigmaSVG:
     def __init__(self,file, componentName):
 
         print("Reading: "+file)
+
+        self.componentTypes = ['component',
+                               'label',
+                               'button',
+                               'rotaryslider',
+                               'scrollbar',
+                               'togglebutton',
+                               'bounds']
 
         # setting up svg elements to be parsed
         doc = minidom.parse(file)  # parseString also exists
@@ -37,9 +46,8 @@ class ReadFigmaSVG:
         self.scaleSettings = []
         self.scaleSettings.append(self.defaultScaleSettings.copy()) #Scale settings is a stack container, pushing/popping current scale settings on the same end
         self.childComponents = []
-        self.labels = []
         self.states = [] # painted objects go here now
-        self.states.append(aj.ComponentGraphicState(self.componentName))
+        self.states.append(jP.ComponentGraphicState(self.componentName))
 
         # Getting component names, these elements will then be ignored as they will have their own svg file
         self.componentNames = []
@@ -58,9 +66,6 @@ class ReadFigmaSVG:
     def getComponentStates(self):
         return self.states
 
-    def getLabels(self):
-        return self.labels
-
     def _removeTextNodes(self,nodes):
 
         for i, child in reversed(list(enumerate(nodes))):
@@ -76,7 +81,7 @@ class ReadFigmaSVG:
         except:
             elementId = ""
             pass
-        if "::component" in elementId or "::Component" in elementId:
+        if any("::"+componentType in elementId.lower() for componentType in self.componentTypes):
             elementDataName = element.attributes['id'].value
             elementDataName = re.split("#",elementDataName)
             childComponentName = elementDataName[-1]
@@ -102,29 +107,28 @@ class ReadFigmaSVG:
             return
         if "::" in elementId:
 
-            if "::ignore" in elementId:
+            if "::ignore" in elementId.lower():
                 pass
             elif "#" not in elementId:
                 print(ValueError)
                 print(elementId)
                 print("you forgot the hashes")
                 exit()
-            elif "::component" in elementId or "::Component" in elementId:
+            elif any("::"+componentType in elementId.lower() for componentType in self.componentTypes):
                 # get child name, parse element
-                self._parseComponentNode(element)
-            elif "::label" in elementId or "::Label" in elementId:
-                self._parseLabelNode(element)
-            elif "::state" in elementId or "::State" in elementId:
+                componentType = [componentType for componentType in self.componentTypes if "::"+componentType in elementId.lower()][0]
+                self._parseComponentNode(element,componentType)
+            elif "::state" in elementId.lower():
                 stateName = elementId.split("#")[1]
-                self.states.append(aj.ComponentGraphicState(self.componentName, stateName))
+                self.states.append(jP.ComponentGraphicState(self.componentName, stateName))
                 self._parseGraphicsNode(element) # STOP GAP UNTIL BUTTON STATES ARE WORKED OUT
-                self.states.append(aj.ComponentGraphicState(self.componentName))
-            elif "::blendMode" in elementId: # Blendmode:blendcolour (in hash)
+                self.states.append(jP.ComponentGraphicState(self.componentName))
+            elif "::blendMode" in elementId.lower(): # Blendmode:blendcolour (in hash)
                 self.blendMode = elementId.split("#")[1].split(":")[0]
                 self.blendColour = elementId.split("#")[1].split(":")[1]
                 self._parseGraphicsNode(element)
                 self.blendMode = 'normal'
-            elif "::scales" in elementId:
+            elif "::scales" in elementId.lower():
 
                 newScaleSettings = self.defaultScaleSettings.copy()
                 if "bounds" in elementId:
@@ -133,6 +137,8 @@ class ReadFigmaSVG:
                     newScaleSettings['scalesLinearly'] = True
                 elif "centre" in elementId:
                     newScaleSettings['centre'] = True
+                else:
+                    print("Warning: ::scales not recognised")
                 self.scaleSettings.append(newScaleSettings)
 
                 self._parseGraphicsNode(element)
@@ -163,13 +169,14 @@ class ReadFigmaSVG:
             try:
                 element.attributes['id'].value
             except:
-                print("you didnt turn on element ids: "+self.componentName)
-                exit()
+                exit("you didnt turn on element ids: "+self.componentName)
             self._parseGraphicsNode(element)
             return 'g'
 
     # Parsing component - will get rectangle element and use that as the set bounds in juce
-    def _parseComponentNode(self,element):
+    def _parseComponentNode(self,element,componentType="component"):
+
+        brush = self._getBrush(element)
 
         elementDataName = element.attributes['id'].value
         elementDataName = re.split("#",elementDataName)
@@ -186,19 +193,27 @@ class ReadFigmaSVG:
         boundsX = element.attributes['width'].value
         boundsY = element.attributes['height'].value
 
-        newChild = aj.ChildComponent(childComponentName,startX,startY,boundsX,boundsY)
-        self.childComponents.append(newChild)
+        if componentType == "component":
+            newChild = jC.ChildComponent(childComponentName,startX,startY,boundsX,boundsY)
+            self.childComponents.append(newChild)
+        elif componentType == "label":
+            newChild = jC.Label(childComponentName,brush,startX,startY,boundsX,boundsY)
+            self.childComponents.append(newChild)
+        elif componentType == "button" or componentType == "togglebutton":
+            newChild = jC.Button(childComponentName,startX,startY,boundsX,boundsY)
+            self.childComponents.append(newChild)
+        elif componentType == "scrollbar":
+            newChild = jC.ScrollBar(childComponentName)
+            self.childComponents.append(newChild)
+        elif componentType == "rotaryslider":
+            newChild = jC.RotarySlider(childComponentName,startX,startY,boundsX,boundsY)
+            self.childComponents.append(newChild)
+        elif componentType == "bounds":
+            newChild = jC.Bounds(childComponentName,startX,startY,boundsX,boundsY)
+            self.childComponents.append(newChild)
+        else:
+            exit("ERR: No component type found")
 
-    def _parseLabelNode(self,element):
-
-        brush = self._getBrush(element)
-
-        elementDataName = element.attributes['id'].value
-        elementDataName = re.split("#",elementDataName)
-        labelText = elementDataName[-1]
-
-        newLabel = aj.Label(labelText, brush, 0,0,0,0)
-        self.labels.append(newLabel)
 
     # Most common svg node, contains more specific graphic elements within, therefore recursive call to self.parsenode
     def _parseGraphicsNode(self,element):
@@ -250,16 +265,16 @@ class ReadFigmaSVG:
         else:
             name = self._checkName(name)
 
-        newPaintedObject = aj.Path(name,brush)
+        newPaintedObject = jP.Path(name,brush)
         newPaintedObject.setSVGBounds(self.svgWidth,self.svgHeight)
         newPaintedObject.setScalesWithBounds(self.scaleSettings[-1])
 
-        LineStart = aj.PathMove(x1,y1)
+        LineStart = jP.PathMove(x1,y1)
         LineStart.setSVGBounds(self.svgWidth,self.svgHeight)
         LineStart.setScalesWithBounds(self.scaleSettings[-1])
         newPaintedObject.addInstruction(LineStart)
 
-        LineEnd = aj.PathLine(x2,y2)
+        LineEnd = jP.PathLine(x2,y2)
         LineEnd.setSVGBounds(self.svgWidth,self.svgHeight)
         LineEnd.setScalesWithBounds(self.scaleSettings[-1])
         newPaintedObject.addInstruction(LineEnd)
@@ -291,7 +306,7 @@ class ReadFigmaSVG:
             name = str(str(element.nodeName)+self._generateUniqueKey())
         else:
             name = self._checkName(name)
-        newPaintedObject = aj.Path(name,brush)
+        newPaintedObject = jP.Path(name,brush)
         newPaintedObject.setSVGBounds(self.svgWidth,self.svgHeight)
         newPaintedObject.setScalesWithBounds(self.scaleSettings[-1])
 
@@ -306,7 +321,7 @@ class ReadFigmaSVG:
                 y = np.imag(instruction.start)
                 x,y = pathTransform.applyTransforms([x,y])
 
-                newIns = aj.PathMove(x,y)
+                newIns = jP.PathMove(x,y)
                 newIns.setSVGBounds(self.svgWidth,self.svgHeight)
                 newIns.setScalesWithBounds(self.scaleSettings[-1])
                 newPaintedObject.addInstruction(newIns)
@@ -316,7 +331,7 @@ class ReadFigmaSVG:
                 y = np.imag(instruction.end)
                 x,y = pathTransform.applyTransforms([x,y])
 
-                newIns = aj.PathLine(x,y)
+                newIns = jP.PathLine(x,y)
                 newIns.setSVGBounds(self.svgWidth,self.svgHeight)
                 newIns.setScalesWithBounds(self.scaleSettings[-1])
                 newPaintedObject.addInstruction(newIns)
@@ -334,7 +349,7 @@ class ReadFigmaSVG:
                 endY = np.imag(instruction.end)
                 endX,endY = pathTransform.applyTransforms([endX,endY])
 
-                newIns = aj.PathCubic(control1X,control1Y,control2X,control2Y,endX,endY)
+                newIns = jP.PathCubic(control1X,control1Y,control2X,control2Y,endX,endY)
                 newIns.setSVGBounds(self.svgWidth,self.svgHeight)
                 newIns.setScalesWithBounds(self.scaleSettings[-1])
 
@@ -359,7 +374,7 @@ class ReadFigmaSVG:
                 control2X = endX+(2/3)*(controlX-endX)
                 control2Y = endY+(2/3)*(controlY-endY)
 
-                newIns = aj.PathCubic(control1X,control1Y,control2X,control2Y,endX,endY)
+                newIns = jP.PathCubic(control1X,control1Y,control2X,control2Y,endX,endY)
                 newIns.setSVGBounds(self.svgWidth,self.svgHeight)
                 newIns.setScalesWithBounds(self.scaleSettings[-1])
 
@@ -378,14 +393,14 @@ class ReadFigmaSVG:
                 radiusX,radiusY = pathTransform.applyTransforms([radiusX,radiusY],type='scalar')
                 startAngle = pathTransform.applyTransforms(startAngle,type='angle')
 
-                newIns = aj.PathArc(centreX,centreY,radiusX,radiusY,instruction.rotation,startAngle,startAngle+deltaAngle)
+                newIns = jP.PathArc(centreX,centreY,radiusX,radiusY,instruction.rotation,startAngle,startAngle+deltaAngle)
                 newIns.setSVGBounds(self.svgWidth,self.svgHeight)
                 newIns.setScalesWithBounds(self.scaleSettings[-1])
 
                 newPaintedObject.addInstruction(newIns)
 
             elif instruction.__class__.__name__ == "Close":
-                newIns = aj.PathClose()
+                newIns = jP.PathClose()
                 newIns.setSVGBounds(self.svgWidth,self.svgHeight)
                 newIns.setScalesWithBounds(self.scaleSettings[-1])
                 newPaintedObject.addInstruction(newIns)
@@ -426,7 +441,7 @@ class ReadFigmaSVG:
         else:
             name = self._checkName(name)
 
-        newPaintedObject = aj.Rect(name,brush)
+        newPaintedObject = jP.Rect(name,brush)
         newPaintedObject.setSVGBounds(self.svgWidth,self.svgHeight)
         newPaintedObject.setScalesWithBounds(self.scaleSettings[-1])
         newPaintedObject.addData(x,y,width,height,rx,ry)
@@ -447,7 +462,7 @@ class ReadFigmaSVG:
         else:
             name = self._checkName(name)
 
-        newPaintedObject = aj.Ellipse(name,brush)
+        newPaintedObject = jP.Ellipse(name,brush)
         newPaintedObject.setSVGBounds(self.svgWidth,self.svgHeight)
         newPaintedObject.setScalesWithBounds(self.scaleSettings[-1])
         newPaintedObject.addData(centreX,centreY,radius,radius)
@@ -469,7 +484,7 @@ class ReadFigmaSVG:
         else:
             name = self._checkName(name)
 
-        newPaintedObject = aj.Ellipse(name,brush)
+        newPaintedObject = jP.Ellipse(name,brush)
         newPaintedObject.setSVGBounds(self.svgWidth,self.svgHeight)
         newPaintedObject.setScalesWithBounds(self.scaleSettings[-1])
         newPaintedObject.addData(centreX,centreY,radiusX,radiusY)

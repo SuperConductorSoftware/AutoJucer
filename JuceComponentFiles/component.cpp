@@ -10,7 +10,7 @@
 #include "not_a_real_name.h"
 
 //==============================================================================
-not_a_real_name::not_a_real_name(std::unique_ptr<AudioProcessorValueTreeState>& parameters)
+not_a_real_name::not_a_real_name(AudioProcessorValueTreeState& parameters)
 	: unusedmember(0)
 // >>>>INITIALISATION>>>> (auto-generated)//
 

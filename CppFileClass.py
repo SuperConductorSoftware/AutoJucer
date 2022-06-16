@@ -87,7 +87,7 @@ class CppFileClass:
     def __writeCodeFromSections(self):
 
         for index, [name, section] in enumerate(self.headerLocations.items()):
-            if self.headerToggles[name]==str(0):
+            if self.headerToggles[name]==0:
                 continue
 
             code = section.getCode()
@@ -97,7 +97,7 @@ class CppFileClass:
                 functionStart+=1
 
         for index, [name, section] in enumerate(self.cppLocations.items()):
-            if self.cppToggles[name]==str(0):
+            if self.cppToggles[name]==0:
                 continue
 
             code = section.getCode()
@@ -149,27 +149,16 @@ class CppFileClass:
 
     def __addChildComponent(self,object):
         includes, declaration, constructor, resized, initialisation = object.getChildCodeComponents()
-        self.headerLocations['include'].addCode(includes)
-        self.headerLocations['privatemembers'].addCode(declaration)
-        self.cppLocations['constructor'].addCode(constructor)
-        self.cppLocations['resized'].addCode(resized)
-        self.cppLocations['initialisation'].addCode(initialisation)
-
-    def addLabels(self,objects):
-        if not isinstance(objects,list):
-            self.__addLabel(objects)
-            return
-
-        for object in objects:
-            self.__addLabel(object)
-
-    def __addLabel(self, object):
-        declaration,constructor,resized = object.getCode()
-
-        self.headerLocations['privatemembers'].addCode(declaration)
-        self.cppLocations['constructor'].addCode(constructor)
-        self.cppLocations['resized'].addCode(resized)
-
+        if includes is not None:
+            self.headerLocations['include'].addCode(includes)
+        if declaration is not None:
+            self.headerLocations['privatemembers'].addCode(declaration)
+        if constructor is not None:
+            self.cppLocations['constructor'].addCode(constructor)
+        if resized is not None:
+            self.cppLocations['resized'].addCode(resized)
+        if initialisation is not None:
+            self.cppLocations['initialisation'].addCode(initialisation)
 
     def _findFunctionLine(self,functionName,file="cpp"):
 
